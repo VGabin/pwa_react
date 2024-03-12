@@ -1,0 +1,83 @@
+version: '3'
+
+# Creation of a network that allow services to communicate
+networks:
+  shared_services:
+
+services:
+  # Make a PHP container
+  php:
+    # Container name
+    container_name: php.localhost
+    # Build the dockerfile which is in a specific folder
+    build:
+      context: .
+      dockerfile: ./deploy/php/Dockerfile
+    networks:
+      - shared_services
+    # The volumes is here because it's required for the make:entity
+    volumes:
+      - ./gatherlink-back:/var/www/html
+
+  # Make a MySQL container for the database
+  mysql:
+    # Container name
+    container_name: mysql.localhost
+    # Setup static images
+    image: mysql:8
+    # DB logins
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    # Ports used to communicate
+    ports:
+      - 3306:3306
+    networks:
+      - shared_services
+    # The volumes is used to save the datas
+    volumes:
+      - ./data/dev:/var/lib/mysql
+
+  nginx:
+    # Container name
+    container_name: nginx.localhost
+    # Build the dockerfile which is in a specific folder
+    build:
+      context: .
+      dockerfile: ./deploy/nginx/Dockerfile
+    # Ports used to communicate
+    ports:
+      - 80:80
+    networks:
+      - shared_services
+    volumes:
+      - ./gatherlink-back:/var/www/html
+
+  # Make a composer container to install requierements
+  composer:
+    # Container name
+    container_name: composer.localhost
+    # Build the dockerfile which is in a specific folder
+    build:
+      context: .
+      dockerfile: ./deploy/composer/Dockerfile
+    networks:
+      - shared_services
+    # The volume is setup because I want to save the composer.json
+    volumes:
+      - ./gatherlink-back:/var/www/html
+    command: composer install && composer require
+
+  phpmyadmin:
+    container_name: phpmyadmin.localhost
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 8080:80
+    networks:
+      - shared_services
