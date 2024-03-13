@@ -17,7 +17,7 @@ services:
       - shared_services
     # The volumes is here because it's required for the make:entity
     volumes:
-      - ./gatherlink-back:/var/www/html
+      - ./back:/var/www/html
 
   # Make a MySQL container for the database
   mysql:
@@ -53,7 +53,7 @@ services:
     networks:
       - shared_services
     volumes:
-      - ./gatherlink-back:/var/www/html
+      - ./back:/var/www/html
 
   # Make a composer container to install requierements
   composer:
@@ -67,7 +67,7 @@ services:
       - shared_services
     # The volume is setup because I want to save the composer.json
     volumes:
-      - ./gatherlink-back:/var/www/html
+      - ./back:/var/www/html
     command: composer install && composer require
 
   phpmyadmin:
@@ -81,3 +81,15 @@ services:
       - 8080:80
     networks:
       - shared_services
+
+  react:
+    # Container name
+    container_name: react.localhost
+    # Build the dockerfile which is in a specific folder
+    build:
+      context: .
+      dockerfile: ./deploy/react/Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./front:/usr/src/app/react-docker

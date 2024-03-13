@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-COPY ../../gatherlink-back /var/www/html
+COPY ../../back /var/www/html
 
 RUN apt-get update && apt-get install -y curl \
     && curl -o /usr/local/bin/wait-for-it https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
